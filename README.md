@@ -10,6 +10,9 @@
 
 * PYTHON
 
+## 개발 환경
+
+* Visual Studio Code
 
 
 ## 팀원
