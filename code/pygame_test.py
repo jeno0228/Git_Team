@@ -40,7 +40,7 @@ def crash(obj1, obj2):
     return False
 
 panda = obj()
-panda.put_img("code/lesserpanda.jpg")
+panda.put_img("ss.png")
 panda.change_size(50,50)
 bullets = []
 enemies = []
@@ -67,7 +67,7 @@ down_go = False
 shooting = False
 color = (0,0,0)
 killed = 0
-font = pygame.font.Font("code/bold_pw.ttf",20)
+font = pygame.font.Font("bold_pw.ttf",20)
 
 start_time = datetime.now()
 SB = 0
@@ -135,8 +135,8 @@ while SB == 0:
     
     if random.random() > 0.98:
         enemy = obj()
-        enemy.put_img("code/enemy.jpg")
-        enemy.change_size(10,10)
+        enemy.put_img("aa.png")
+        enemy.change_size(15,15)
         enemy.x, enemy.y = random.choice(spawn)
         enemy.mv = 4
         enemies.append(enemy)
