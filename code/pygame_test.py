@@ -112,7 +112,7 @@ while SB == 0:
     if shooting:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             bullet = obj()
-            bullet.put_img("code/bullet.jpg")
+            bullet.put_img("bullet.jpg")
             bullet.change_size(5,5)
             bullet.mv = 8
             bullet.mv_x = ((bullet.mv**2)*(mouse_x-panda.x-panda.sx//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
