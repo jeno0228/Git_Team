@@ -44,6 +44,7 @@ panda.put_img("code/ss.png")
 panda.change_size(50,50)
 bullets = []
 enemies = []
+items = []
 spawn = []
 for i in range(size[1]):
     spawn.append((0,i))
@@ -124,8 +125,11 @@ while SB == 0:
             bullet.x = panda.x+panda.sx//2
             bullet.y = panda.y+panda.sy//2
             bullets.append(bullet)
+
+            
     dm_bullets = []
     dm_enemies = []
+    dm_items = []
     for i in range(len(bullets)):
         bullet = bullets[i]
         bullet.x += bullet.mv_x
@@ -140,6 +144,17 @@ while SB == 0:
         enemy.x, enemy.y = random.choice(spawn)
         enemy.mv = 4
         enemies.append(enemy)
+
+    if (random.random() > 0.9999 and len(items) < 3):
+        item = obj()
+        item.put_img("code/item.png")
+        item.change_size(15,15)
+        item.x = random.randint(0,size[0]-15)
+        item.y = random.randint(0,size[1]-15)
+        items.append(item)
+
+
+
 
     for i in range(len(enemies)):
         enemy = enemies[i]
@@ -167,6 +182,13 @@ while SB == 0:
             pygame.display.flip()
             SB = 1
             time.sleep(1)
+    
+    for i in range(len(items)):
+        item = items[i]
+        if crash(item, panda):
+            panda.mv += 0.1
+            dm_items.append(i)
+    
     now_time = datetime.now()
     delta_time = (now_time-start_time).total_seconds()
     screen.fill(color)
@@ -179,6 +201,10 @@ while SB == 0:
             new_bullets.append(bullet)
             bullet.show()
     bullets = new_bullets[:]
+
+
+
+
     new_enemies = []
     for i in range(len(enemies)):
         enemy = enemies[i]
@@ -187,6 +213,14 @@ while SB == 0:
             enemy.show()
     enemies = new_enemies[:]
     
+    new_items = []
+    for i in range(len(items)):
+        item = items[i]
+        if i not in dm_items:
+            new_items.append(item)
+            item.show()
+    items = new_items[:]
+
     text = font.render("killed : {}, time : {}".format(killed, delta_time), True, (255,255,255))
     screen.blit(text, (10,5))
     
