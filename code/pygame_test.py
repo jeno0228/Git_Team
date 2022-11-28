@@ -67,13 +67,35 @@ up_go = False
 down_go = False
 shooting = False
 color = (0,0,0)
+white = (255, 255, 255)
 killed = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
 
-start_time = datetime.now()
+# start
 SB = 0
+ST = 0
+while ST == 0:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            ST = 1
+            SB = 1
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if (mouse_x >= 400) & (mouse_x <= 500):
+                if (mouse_y >= 400) & (mouse_y <= 500):
+                    ST = 1
+    text = font.render("Game Start", True, white)
+    rect = text.get_rect()
+    rect.center = (450, 450)
+    screen.fill(color)
+    screen.blit(text, rect)
+    pygame.display.flip()
+
+start_time = datetime.now()
+delay = 0
+# main
 while SB == 0:
-    
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -98,8 +120,10 @@ while SB == 0:
                 down_go = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             shooting = True
+            delay = 0
         elif event.type == pygame.MOUSEBUTTONUP:
             shooting = False
+            delay = 1
 
 
     if panda.x > 0 and left_go:
@@ -110,12 +134,12 @@ while SB == 0:
         panda.y -= panda.mv
     if (panda.y+panda.sy)<size[1] and down_go:
         panda.y += panda.mv
-    if shooting:
+    if shooting & (delay % 10 == 0):
             mouse_x, mouse_y = pygame.mouse.get_pos()
             bullet = obj()
             bullet.put_img("code/bullet.jpg")
             bullet.change_size(5,5)
-            bullet.mv = 8
+            bullet.mv = 20
             bullet.mv_x = ((bullet.mv**2)*(mouse_x-panda.x-panda.sx//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
             bullet.mv_y = ((bullet.mv**2)*(mouse_y-panda.y-panda.sy//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
             if mouse_x < panda.x:
@@ -125,7 +149,7 @@ while SB == 0:
             bullet.x = panda.x+panda.sx//2
             bullet.y = panda.y+panda.sy//2
             bullets.append(bullet)
-
+    delay +=1
             
     dm_bullets = []
     dm_enemies = []
@@ -140,7 +164,7 @@ while SB == 0:
     if random.random() > 0.98:
         enemy = obj()
         enemy.put_img("code/aa.png")
-        enemy.change_size(15,15)
+        enemy.change_size(30,30)
         enemy.x, enemy.y = random.choice(spawn)
         enemy.mv = 4
         enemies.append(enemy)
@@ -190,7 +214,7 @@ while SB == 0:
             dm_items.append(i)
     
     now_time = datetime.now()
-    delta_time = (now_time-start_time).total_seconds()
+    delta_time = round((now_time-start_time).total_seconds())
     screen.fill(color)
 
     panda.show()
