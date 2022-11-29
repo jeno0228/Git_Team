@@ -17,6 +17,7 @@ clock = pygame.time.Clock()
 
 background_music = pygame.mixer.Sound('code/sci-fi_theme.mp3')
 background_music.play(-1)
+
 class obj:
     def __init__(self):
         self.x = 0
@@ -54,6 +55,7 @@ panda.change_size(50,50)
 bullets = []
 enemies = []
 items = []
+bullet_items = []
 spawn = []
 for i in range(size[1]):
     spawn.append((0,i))
@@ -61,7 +63,6 @@ for i in range(size[1]):
 for i in range(size[0]):
     spawn.append((i,0))
     spawn.append((i,size[1]))
-
 
 
 
@@ -78,6 +79,8 @@ shooting = False
 color = (0,0,0)
 white = (255, 255, 255)
 killed = 0
+level = 0
+bullet_size = 5
 font = pygame.font.Font("code/bold_pw.ttf",20)
 
 # start
@@ -129,13 +132,13 @@ while SB == 0:
                 down_go = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             shooting = True
-            shoot_sound.play()
             delay = 0
         elif event.type == pygame.MOUSEBUTTONUP:
             shooting = False
             delay = 1
 
-
+    if level >= 18:
+        level = 18
     if panda.x > 0 and left_go:
         panda.x -= panda.mv
     if (panda.x+panda.sx)<size[0] and right_go:
@@ -144,11 +147,12 @@ while SB == 0:
         panda.y -= panda.mv
     if (panda.y+panda.sy)<size[1] and down_go:
         panda.y += panda.mv
-    if shooting & (delay % 10 == 0):
+    if shooting & (delay % (10-level//2) == 0):
             mouse_x, mouse_y = pygame.mouse.get_pos()
+            shoot_sound.play()
             bullet = obj()
             bullet.put_img("code/bullet.jpg")
-            bullet.change_size(5,5)
+            bullet.change_size(bullet_size, bullet_size)
             bullet.mv = 20
             bullet.mv_x = ((bullet.mv**2)*(mouse_x-panda.x-panda.sx//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
             bullet.mv_y = ((bullet.mv**2)*(mouse_y-panda.y-panda.sy//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
@@ -164,6 +168,7 @@ while SB == 0:
     dm_bullets = []
     dm_enemies = []
     dm_items = []
+    dm_bullet_items = []
     for i in range(len(bullets)):
         bullet = bullets[i]
         bullet.x += bullet.mv_x
@@ -171,7 +176,7 @@ while SB == 0:
         if bullet.y <= -bullet.sy or bullet.x <= -bullet.sx or bullet.x > size[0] or bullet.y > size[1]:
             dm_bullets.append(i)
     
-    if random.random() > 0.98:
+    if random.random() > (0.98-0.01*level):
         enemy = obj()
         enemy.put_img("code/aa.png")
         enemy.change_size(30,30)
@@ -186,8 +191,13 @@ while SB == 0:
         item.x = random.randint(0,size[0]-15)
         item.y = random.randint(0,size[1]-15)
         items.append(item)
-
-
+    if (random.random() > 0.9999 and len(bullet_items) < 3):
+        item = obj()
+        item.put_img("code/item_bullet.png")
+        item.change_size(15,15)
+        item.x = random.randint(0,size[0]-15)
+        item.y = random.randint(0,size[1]-15)
+        bullet_items.append(item)
 
 
     for i in range(len(enemies)):
@@ -201,6 +211,7 @@ while SB == 0:
         enemy.x += enemy.mv_x
         enemy.y += enemy.mv_y
     
+
     for i in range(len(enemies)):
         enemy = enemies[i]
         for j in range(len(bullets)):
@@ -210,6 +221,8 @@ while SB == 0:
                 dm_enemies.append(i)
                 dm_bullets.append(j)
                 killed += 1
+
+
     for enemy in enemies:
         if crash(enemy, panda):
             explosion_sound_2.play()
@@ -224,9 +237,17 @@ while SB == 0:
         if crash(item, panda):
             panda.mv += 0.1
             dm_items.append(i)
+
+    for i in range(len(bullet_items)):
+        item = bullet_items[i]
+        if crash(item, panda):
+            bullet_size += 0.2
+            dm_bullet_items.append(i)
     
+
     now_time = datetime.now()
     delta_time = round((now_time-start_time).total_seconds())
+    level = delta_time//60
     screen.fill(color)
 
     panda.show()
@@ -257,7 +278,16 @@ while SB == 0:
             item.show()
     items = new_items[:]
 
-    text = font.render("killed : {}, time : {}".format(killed, delta_time), True, (255,255,255))
+    new_items = []
+    for i in range(len(bullet_items)):
+        item = bullet_items[i]
+        if i not in dm_bullet_items:
+            new_items.append(item)
+            item.show()
+    bullet_items = new_items[:]
+
+
+    text = font.render("killed : {}, time : {}, score : {}".format(killed, delta_time, killed+delta_time//10), True, (255,255,255))
     screen.blit(text, (10,5))
     
     #update
