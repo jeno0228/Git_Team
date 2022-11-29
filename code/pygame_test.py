@@ -1,4 +1,5 @@
-import pygame 
+import pygame
+import os
 import random
 import time
 from datetime import datetime
@@ -14,6 +15,8 @@ pygame.display.set_caption(title)
 # 게임 내 필요한 설정
 clock = pygame.time.Clock()
 
+background_music = pygame.mixer.Sound('code/sci-fi_theme.mp3')
+background_music.play(-1)
 class obj:
     def __init__(self):
         self.x = 0
@@ -38,6 +41,12 @@ def crash(obj1, obj2):
             if obj1.y-obj2.sy <= obj2.y and obj2.y <= obj1.y+obj1.sy:
                 return True
     return False
+
+
+shoot_sound = pygame.mixer.Sound('code/laserfire01.ogg')
+explosion_sound_1 = pygame.mixer.Sound('code/explosion.wav')
+explosion_sound_2 = pygame.mixer.Sound('code/DeathFlash.flac')
+
 
 panda = obj()
 panda.put_img("code/ss.png")
@@ -120,6 +129,7 @@ while SB == 0:
                 down_go = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             shooting = True
+            shoot_sound.play()
             delay = 0
         elif event.type == pygame.MOUSEBUTTONUP:
             shooting = False
@@ -196,16 +206,18 @@ while SB == 0:
         for j in range(len(bullets)):
             bullet = bullets[j]
             if crash(enemy, bullet):
+                explosion_sound_1.play()
                 dm_enemies.append(i)
                 dm_bullets.append(j)
                 killed += 1
     for enemy in enemies:
         if crash(enemy, panda):
+            explosion_sound_2.play()
             lose = font.render("GAME OVER", True, (255,0,0))
             screen.blit(lose, (400,400))
             pygame.display.flip()
             SB = 1
-            time.sleep(1)
+            time.sleep(4)
     
     for i in range(len(items)):
         item = items[i]
