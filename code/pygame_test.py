@@ -57,6 +57,7 @@ enemies = []
 items = []
 bullet_items = []
 spawn = []
+lives = [] # 목숨 리스트
 for i in range(size[1]):
     spawn.append((0,i))
     spawn.append((size[0],i))
@@ -69,6 +70,15 @@ for i in range(size[0]):
 panda.x = (size[0]-panda.sx)//2
 panda.y = (size[1]-panda.sy)//2
 panda.mv = 5    #이속증가 템 추가
+
+# 목숨 이미지, 화면 왼쪽 아래에 나오게 위치 설정
+# for 문의 range의 인자는 목숨의 갯수를 의미함
+for i in range(5):
+    life = obj()
+    life.put_img("code/ss.png")
+    life.change_size(30, 30)
+    life.x, life.y = 15 + i*(life.sx + life.sx/2), size[1] - life.sy - 10
+    lives.append(life)
 
 
 left_go = False
@@ -169,6 +179,8 @@ while SB == 0:
     dm_enemies = []
     dm_items = []
     dm_bullet_items = []
+    dm_lives = []
+
     for i in range(len(bullets)):
         bullet = bullets[i]
         bullet.x += bullet.mv_x
@@ -221,16 +233,6 @@ while SB == 0:
                 dm_enemies.append(i)
                 dm_bullets.append(j)
                 killed += 1
-
-
-    for enemy in enemies:
-        if crash(enemy, panda):
-            explosion_sound_2.play()
-            lose = font.render("GAME OVER", True, (255,0,0))
-            screen.blit(lose, (400,400))
-            pygame.display.flip()
-            SB = 1
-            time.sleep(4)
     
     for i in range(len(items)):
         item = items[i]
@@ -243,6 +245,12 @@ while SB == 0:
         if crash(item, panda):
             bullet_size += 0.2
             dm_bullet_items.append(i)
+
+    for i in range(len(enemies)):
+        enemy = enemies[i]
+        if crash(enemy, panda):
+            dm_enemies.append(i)
+            dm_lives.append(len(lives) - 1 )
     
 
     now_time = datetime.now()
@@ -286,6 +294,23 @@ while SB == 0:
             item.show()
     bullet_items = new_items[:]
 
+    
+    new_lives = []
+    for i in range(len(lives)):
+        life = lives[i]
+        if i not in dm_lives:
+            new_lives.append(life)
+            life.show()
+    lives = new_lives[:]
+
+    # 목숨이 0일때 게임 종료
+    if len(lives) == 0:
+        explosion_sound_2.play()
+        lose = font.render("GAME OVER", True, (255,0,0))
+        screen.blit(lose, (400,400))
+        pygame.display.flip()
+        SB = 1
+        time.sleep(4)
 
     text = font.render("killed : {}, time : {}, score : {}".format(killed, delta_time, killed+delta_time//10), True, (255,255,255))
     screen.blit(text, (10,5))
