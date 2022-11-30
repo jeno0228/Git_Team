@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 #아이템, 이동방향(4), 목표물 4면
 pygame.init()
-size = [900,700]
+size = [900,900]
 screen = pygame.display.set_mode(size)
 
 #게임창 옵션 설정
