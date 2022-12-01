@@ -1,3 +1,4 @@
+import math
 import pygame
 import os
 import random
@@ -56,6 +57,7 @@ bullets = []
 enemies = []
 items = []
 bullet_items = []
+bullet3_items = []
 spawn = []
 for i in range(size[1]):
     spawn.append((0,i))
@@ -81,6 +83,7 @@ white = (255, 255, 255)
 killed = 0
 level = 0
 bullet_size = 5
+remaining_bullet = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
 
 # start
@@ -149,26 +152,74 @@ while SB == 0:
         panda.y += panda.mv
     if shooting & (delay % (10-level//2) == 0):
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            shoot_sound.play()
-            bullet = obj()
-            bullet.put_img("code/bullet.jpg")
-            bullet.change_size(bullet_size, bullet_size)
-            bullet.mv = 20
-            bullet.mv_x = ((bullet.mv**2)*(mouse_x-panda.x-panda.sx//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
-            bullet.mv_y = ((bullet.mv**2)*(mouse_y-panda.y-panda.sy//2)**2//((mouse_x-panda.x-panda.sx//2)**2+(mouse_y-panda.y-panda.sy//2)**2))**(1/2)
-            if mouse_x < panda.x:
-                bullet.mv_x = -bullet.mv_x
-            if mouse_y < panda.y:
-                bullet.mv_y = -bullet.mv_y
-            bullet.x = panda.x+panda.sx//2
-            bullet.y = panda.y+panda.sy//2
-            bullets.append(bullet)
+            if (mouse_x-panda.x-panda.sx//2) == 0:
+                radian = math.atan((mouse_y-panda.y-panda.sy//2)/(0.00001)) # ZeroDivisionError
+            else:
+                radian = math.atan((mouse_y-panda.y-panda.sy//2)/(mouse_x-panda.x-panda.sx//2))
+            if remaining_bullet == 0: 
+                bullet = obj()
+                shoot_sound.play()
+                bullet.put_img("code/bullet.jpg")
+                bullet.change_size(bullet_size, bullet_size)
+                bullet.mv = 20
+                bullet.mv_x = bullet.mv*math.cos(radian)
+                bullet.mv_y = bullet.mv*math.sin(radian)
+                if mouse_x < panda.x+panda.sx//2:
+                    bullet.mv_x *= -1
+                    bullet.mv_y *= -1
+                bullet.x = panda.x+panda.sx//2
+                bullet.y = panda.y+panda.sy//2
+                bullets.append(bullet)
+            else:
+                remaining_bullet -= 1
+                bullet = obj()
+                shoot_sound.play()
+                bullet.put_img("code/bullet.jpg")
+                bullet.change_size(bullet_size, bullet_size)
+                bullet.mv = 20
+                bullet.mv_x = bullet.mv*math.cos(radian)
+                bullet.mv_y = bullet.mv*math.sin(radian)
+                if mouse_x < panda.x+panda.sx//2:
+                    bullet.mv_x *= -1
+                    bullet.mv_y *= -1
+                bullet.x = panda.x+panda.sx//2
+                bullet.y = panda.y+panda.sy//2
+                bullets.append(bullet)
+                
+                bullet = obj()
+                shoot_sound.play()
+                bullet.put_img("code/bullet.jpg")
+                bullet.change_size(bullet_size, bullet_size)
+                bullet.mv = 20
+                bullet.mv_x = bullet.mv*math.cos(radian-math.pi/36)
+                bullet.mv_y = bullet.mv*math.sin(radian-math.pi/36)
+                if mouse_x < panda.x+panda.sx//2:
+                    bullet.mv_x *= -1
+                    bullet.mv_y *= -1
+                bullet.x = panda.x+panda.sx//2
+                bullet.y = panda.y+panda.sy//2
+                bullets.append(bullet)
+
+                bullet = obj()
+                shoot_sound.play()
+                bullet.put_img("code/bullet.jpg")
+                bullet.change_size(bullet_size, bullet_size)
+                bullet.mv = 20
+                bullet.mv_x = bullet.mv*math.cos(radian+math.pi/36)
+                bullet.mv_y = bullet.mv*math.sin(radian+math.pi/36)
+                if mouse_x < panda.x+panda.sx//2:
+                    bullet.mv_x *= -1
+                    bullet.mv_y *= -1
+                bullet.x = panda.x+panda.sx//2
+                bullet.y = panda.y+panda.sy//2
+                bullets.append(bullet)
     delay +=1
             
     dm_bullets = []
     dm_enemies = []
     dm_items = []
     dm_bullet_items = []
+    dm_bullet3_items = []
     for i in range(len(bullets)):
         bullet = bullets[i]
         bullet.x += bullet.mv_x
@@ -184,20 +235,27 @@ while SB == 0:
         enemy.mv = 4
         enemies.append(enemy)
 
-    if (random.random() > 0.9999 and len(items) < 3):
+    if (random.random() > 0.997 and len(items) < 3):
         item = obj()
         item.put_img("code/item.png")
         item.change_size(15,15)
         item.x = random.randint(0,size[0]-15)
         item.y = random.randint(0,size[1]-15)
         items.append(item)
-    if (random.random() > 0.9999 and len(bullet_items) < 3):
+    if (random.random() > 0.997 and len(bullet_items) < 3):
         item = obj()
         item.put_img("code/item_bullet.png")
         item.change_size(15,15)
         item.x = random.randint(0,size[0]-15)
         item.y = random.randint(0,size[1]-15)
         bullet_items.append(item)
+    if (random.random() > 0.997 and len(bullet3_items) < 3):
+        item = obj()
+        item.put_img("code/increase_bullet.png")
+        item.change_size(15,15)
+        item.x = random.randint(0,size[0]-15)
+        item.y = random.randint(0,size[1]-15)
+        bullet3_items.append(item)
 
 
     for i in range(len(enemies)):
@@ -244,6 +302,12 @@ while SB == 0:
             bullet_size += 0.2
             dm_bullet_items.append(i)
     
+    for i in range(len(bullet3_items)):
+        item = bullet3_items[i]
+        if crash(item, panda):
+            remaining_bullet += 50
+            dm_bullet3_items.append(i)
+    
 
     now_time = datetime.now()
     delta_time = round((now_time-start_time).total_seconds())
@@ -286,8 +350,16 @@ while SB == 0:
             item.show()
     bullet_items = new_items[:]
 
+    new_items = []
+    for i in range(len(bullet3_items)):
+        item = bullet3_items[i]
+        if i not in dm_bullet3_items:
+            new_items.append(item)
+            item.show()
+    bullet3_items = new_items[:]
 
-    text = font.render("killed : {}, time : {}, score : {}".format(killed, delta_time, killed+delta_time//10), True, (255,255,255))
+
+    text = font.render("killed : {}, time : {}, score : {}, remaining bullet3 : {}".format(killed, delta_time, killed+delta_time//10, remaining_bullet), True, (255,255,255))
     screen.blit(text, (10,5))
     
     #update
