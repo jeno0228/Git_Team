@@ -78,6 +78,7 @@ right_go = False
 up_go = False
 down_go = False
 shooting = False
+auto = False
 color = (0,0,0)
 white = (255, 255, 255)
 killed = 0
@@ -124,6 +125,9 @@ while SB == 0:
                 up_go = True
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 down_go = True
+            elif event.key == pygame.K_ESCAPE: # Auto
+                auto = not auto
+                shooting = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 left_go = False
@@ -139,7 +143,6 @@ while SB == 0:
         elif event.type == pygame.MOUSEBUTTONUP:
             shooting = False
             delay = 1
-
     if level >= 18:
         level = 18
     if panda.x > 0 and left_go:
@@ -150,12 +153,26 @@ while SB == 0:
         panda.y -= panda.mv
     if (panda.y+panda.sy)<size[1] and down_go:
         panda.y += panda.mv
+    if auto and enemies != []:
+        shooting = True
     if shooting & (delay % (10-level//2) == 0):
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if not auto:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+            if auto and enemies != []:
+                enemy = enemies[0]
+                for i in enemies:
+                    if (abs(enemy.x+enemy.sx//2-(panda.x+panda.sx//2)) + abs(enemy.y+enemy.sy//2-(panda.y+panda.sy//2))) < (abs(i.x+i.sx//2-(panda.x+panda.sx//2)) + abs(i.y+i.sy//2-(panda.y+panda.sy//2))):
+                        enemy = i # 가장 가까운 적 검색
+                mouse_x = enemies[0].x+enemies[0].sx//2
+                mouse_y = enemies[0].y+enemies[0].sy//2
+            elif enemies == []:
+                shooting = False
             if (mouse_x-panda.x-panda.sx//2) == 0:
                 radian = math.atan((mouse_y-panda.y-panda.sy//2)/(0.00001)) # ZeroDivisionError
             else:
                 radian = math.atan((mouse_y-panda.y-panda.sy//2)/(mouse_x-panda.x-panda.sx//2))
+            
+            
             if remaining_bullet == 0: 
                 bullet = obj()
                 shoot_sound.play()
@@ -357,9 +374,11 @@ while SB == 0:
             new_items.append(item)
             item.show()
     bullet3_items = new_items[:]
-
-
-    text = font.render("killed : {}, time : {}, score : {}, remaining bullet3 : {}".format(killed, delta_time, killed+delta_time//10, remaining_bullet), True, (255,255,255))
+    if auto:
+        autotext = "ON"
+    else:
+        autotext = "OFF"
+    text = font.render("killed : {}, time : {}, score : {}, remaining 3bullets : {}, AUTO : {}".format(killed, delta_time, killed+delta_time//10, remaining_bullet, autotext), True, (255,255,255))
     screen.blit(text, (10,5))
     
     #update
