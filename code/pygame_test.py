@@ -145,14 +145,40 @@ while SB == 0:
             delay = 1
     if level >= 18:
         level = 18
-    if panda.x > 0 and left_go:
-        panda.x -= panda.mv
-    if (panda.x+panda.sx)<size[0] and right_go:
-        panda.x += panda.mv
-    if panda.y > 0 and up_go:
-        panda.y -= panda.mv
-    if (panda.y+panda.sy)<size[1] and down_go:
-        panda.y += panda.mv
+    
+    if auto:
+        total_item = bullet3_items+bullet_items+items
+        if total_item == []:
+            if panda.x+panda.sx//2 < size[0]//2-10:
+                panda.x += panda.mv
+            elif panda.x+panda.sy//2 > size[0]//2+10:
+                panda.x -= panda.mv
+            if panda.y+panda.sy//2 < size[1]//2-10:
+                panda.y += panda.mv
+            elif panda.x+panda.sy//2 > size[1]//2+10:
+                panda.y -= panda.mv
+        else:
+            item = (total_item[0].x+total_item[0].sx//2,total_item[0].y+total_item[0].sy//2)
+            if panda.x+panda.sx//2 < item[0]-5:
+                panda.x += panda.mv
+            elif panda.x+panda.sy//2 > item[0]+5:
+                panda.x -= panda.mv
+
+            if panda.y+panda.sy//2 < item[1]-5:
+                panda.y += panda.mv
+            elif panda.y+panda.sy//2 > item[1]+5:
+                panda.y -= panda.mv
+    else:
+        if panda.x > 0 and left_go:
+            panda.x -= panda.mv
+        if (panda.x+panda.sx)<size[0] and right_go:
+            panda.x += panda.mv
+        if panda.y > 0 and up_go:
+            panda.y -= panda.mv
+        if (panda.y+panda.sy)<size[1] and down_go:
+            panda.y += panda.mv
+
+
     if auto and enemies != []:
         shooting = True
     if shooting & (delay % (10-level//2) == 0):
