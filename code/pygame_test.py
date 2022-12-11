@@ -4,7 +4,6 @@ import os
 import random
 import time
 from datetime import datetime
-from json import dump, load
 #아이템, 이동방향(4), 목표물 4면
 pygame.init()
 size = [900,900]
@@ -60,7 +59,6 @@ items = []
 bullet_items = []
 bullet3_items = []
 spawn = []
-lives = []
 for i in range(size[1]):
     spawn.append((0,i))
     spawn.append((size[0],i))
@@ -74,18 +72,6 @@ panda.x = (size[0]-panda.sx)//2
 panda.y = (size[1]-panda.sy)//2
 panda.mv = 5    #이속증가 템 추가
 
-for i in range(1):
-    life = obj()
-    life.put_img("code/ss.png")
-    life.change_size(30, 30)
-    life.x, life.y = 15 + i*(life.sx + life.sx/2), size[1] - life.sy - 10
-    lives.append(life)
-
-# 결과 창에 나가기 버튼
-exit = obj()
-exit.put_img("code/exitbutton.png")
-exit.change_size(270, 80)
-exit.x, exit.y = size[0]/2 - exit.sx/2, size[1] * (4/5) - exit.sy/2
 
 left_go = False
 right_go = False
@@ -96,24 +82,20 @@ auto = False
 color = (0,0,0)
 white = (255, 255, 255)
 killed = 0
-rank = []
-rank_text =""
 level = 0
 bullet_size = 5
 remaining_bullet = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
-font_r = pygame.font.Font("code/bold_pw.ttf",40)
+
 # start
 SB = 0
 ST = 0
-SE = 0
 while ST == 0:
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             ST = 1
             SB = 1
-            SE = 1
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if (mouse_x >= 400) & (mouse_x <= 500):
@@ -134,7 +116,6 @@ while SB == 0:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             SB = 1
-            SE = 1
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 left_go = True
@@ -280,7 +261,6 @@ while SB == 0:
     dm_bullets = []
     dm_enemies = []
     dm_items = []
-    dm_lives = []
     dm_bullet_items = []
     dm_bullet3_items = []
     for i in range(len(bullets)):
@@ -427,52 +407,7 @@ while SB == 0:
     text = font.render("killed : {}, time : {}, score : {}, remaining 3bullets : {}, AUTO : {}".format(killed, delta_time, killed+delta_time//10, remaining_bullet, autotext), True, (255,255,255))
     screen.blit(text, (10,5))
     
-    if len(lives) == 0:
-        explosion_sound_2.play()
-        lose = font.render("GAME OVER", True, (255,0,0))
-        screen.blit(lose, (400,400))
-        pygame.display.flip()
-        SB = 1
-        time.sleep(4)
-        
-        # 랭크 파일 리스트 불러오기
-        with open("code/rank.json") as f1:
-            data = load(f1)
-            data.append(killed+delta_time//10)
-            data.sort(reverse=True)
-        
-        for i in range(len(data)):
-            if i <= 5:
-                rank.append("rank" + str(i+1) + " : score {}".format(data[i]))
-        text = font.render("killed : {}, time : {}, score : {}".format(killed, delta_time, killed+delta_time//10), True, (255,255,255))
-        screen.blit(text, (10,5))
-    
     #update
     pygame.display.flip()
-
-while SE == 0:
-    clock.tick(60)
-    screen.fill(color)
-    for i in range(len(rank)):
-        text_R = font_r.render(rank[i], True, white)
-        rect_R = text_R.get_rect()
-        rect_R.center = (size[0] * (1/2), size[1] * (1/6) + i * 60)
-        screen.blit(text_R, rect_R)
-    exit.show()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            SE = 1
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            if (mouse_x >= size[0]/2 - exit.sx/2) & (mouse_x <= size[0]/2 + exit.sx/2):
-                if (mouse_y >= size[1] * (4/5) - exit.sy/2) & (mouse_y <= size[1] * (4/5) + exit.sy/2):
-                    SE = 1
-
-    pygame.display.flip()
-
-    with open("code/rank.json", 'w') as f2:
-        dump(data, f2, indent=2)
-
 
 pygame.quit()
