@@ -26,6 +26,7 @@ class obj:
         self.mv = 0
         self.mv_x = 0
         self.mv_y = 0
+        self.hp = 0
     def put_img(self, address):
         if address[-3:] == "png":
             self.img = pygame.image.load(address).convert_alpha()
@@ -52,7 +53,7 @@ explosion_sound_2 = pygame.mixer.Sound('code/DeathFlash.flac')
 
 panda = obj()
 panda.put_img("code/ss.png")
-panda.change_size(50,50)
+panda.change_size(45,50)
 bullets = []
 enemies = []
 items = []
@@ -86,7 +87,7 @@ level = 0
 bullet_size = 5
 remaining_bullet = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
-
+font2 = pygame.font.Font("code/bold_pw.ttf",40)
 # start
 SB = 0
 ST = 0
@@ -96,12 +97,14 @@ while ST == 0:
         if event.type == pygame.QUIT:
             ST = 1
             SB = 1
+            over = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            if (mouse_x >= 400) & (mouse_x <= 500):
-                if (mouse_y >= 400) & (mouse_y <= 500):
+            if (mouse_x >= 320) & (mouse_x <= 580):
+                if (mouse_y >= 420) & (mouse_y <= 480):
                     ST = 1
-    text = font.render("Game Start", True, white)
+                    over = True
+    text = font2.render("Game Start", True, white)
     rect = text.get_rect()
     rect.center = (450, 450)
     screen.fill(color)
@@ -276,6 +279,16 @@ while SB == 0:
         enemy.change_size(30,30)
         enemy.x, enemy.y = random.choice(spawn)
         enemy.mv = 4
+        enemy.hp = 1
+        enemies.append(enemy)
+
+    if random.random() > (0.995-0.02*level):
+        enemy = obj()
+        enemy.put_img("code/stone.png")
+        enemy.change_size(70,70)
+        enemy.x, enemy.y = random.choice(spawn)
+        enemy.mv = 1.5
+        enemy.hp = 15
         enemies.append(enemy)
 
     if (random.random() > 0.997 and len(items) < 3):
@@ -319,19 +332,17 @@ while SB == 0:
             bullet = bullets[j]
             if crash(enemy, bullet):
                 explosion_sound_1.play()
-                dm_enemies.append(i)
+                enemy.hp -= 1
+                if enemy.hp <= 0:
+                    dm_enemies.append(i)
+                    killed += 1    
                 dm_bullets.append(j)
-                killed += 1
 
 
     for enemy in enemies:
         if crash(enemy, panda):
-            explosion_sound_2.play()
-            lose = font.render("GAME OVER", True, (255,0,0))
-            screen.blit(lose, (400,400))
-            pygame.display.flip()
             SB = 1
-            time.sleep(4)
+            time.sleep(2)
     
     for i in range(len(items)):
         item = items[i]
@@ -409,5 +420,16 @@ while SB == 0:
     
     #update
     pygame.display.flip()
-
+while over == True:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            over = False
+    explosion_sound_2.play()
+    lose = font2.render("GAME OVER", True, (255,0,0))
+    myscore = font2.render("SCORE : {}".format(killed+delta_time//10), True, (255,255,255))
+    screen.fill(color)
+    screen.blit(lose, (350,400))
+    screen.blit(myscore, (350, 450))
+    pygame.display.flip()
 pygame.quit()
