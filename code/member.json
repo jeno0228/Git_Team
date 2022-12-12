@@ -1,0 +1,54 @@
+{
+  "user": [
+    {
+      "id": "admin",
+      "password": "admin",
+      "score": 4323
+    },
+    {
+      "id": "something",
+      "password": "something",
+      "score": 15
+    },
+    {
+      "id": "myname",
+      "password": "myname",
+      "score": 20
+    },
+    {
+      "id": "me",
+      "password": "me",
+      "score": 0
+    },
+    {
+      "id": "test",
+      "password": "test",
+      "score": 0
+    },
+    {
+      "id": "test2",
+      "password": "test2",
+      "score": 0
+    },
+    {
+      "id": "wlq8112",
+      "password": "wlq8112",
+      "score": 0
+    },
+    {
+      "id": "dfsd",
+      "password": "sdf",
+      "score": 0
+    },
+    {
+      "id": "weq",
+      "password": "weq",
+      "score": 0
+    },
+    {
+      "id": "gdfgdfg",
+      "password": "fgdfgdf",
+      "score": 0
+    }
+  ]
+}
