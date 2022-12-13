@@ -1,12 +1,66 @@
 import math
 import pygame
+from json import dump, load
 import os
 import random
 import time
 from datetime import datetime
+
+# 콘솔창에서 로그인
+file_path = "code/member.json"
+with open(file_path, "r") as json_file:
+    json_data = load(json_file)
+
+a = []
+i =0
+
+in_str = input("회원가입하시겠습니까 아니면 로그인하시겠습니까? (회원가입/아무거나-로그인)")
+
+i=0
+while in_str=="회원가입":
+    new_id = str(input("아이디을 입력해주세요:\n"))
+    for member in json_data['user']:
+        while member['id']==new_id:
+            print(new_id+"라는 아이디가 이미 존재합니다.")
+            new_id = input("다시 입력해주세요:\n")
+    new_pw = str(input("비밀번호를 입력해주세요:\n"))
+    json_data['user'].append({
+        "id": new_id,
+        "password": new_pw,
+        "score": 0
+    })
+    
+    with open('code/member.json', 'w') as f:
+        dump(json_data, f, indent=2)
+
+    print("회원가입이 완료 되었습니다.\n 아이디는 "+new_id+"이고 비밀번호는 "+new_pw+"입니다")
+    in_str = input("회원가입하시겠습니까 아니면 로그인하시겠습니까?(회원가입/아무거나-로그인)")
+whatid = input("아이디를 입력해주세요:\n")
+
+for mem in json_data['user']:
+    if mem['id']==whatid:
+        a.append(i)
+        real_pw = mem['password']
+        current_score = mem['score']
+    i=i+1
+while len(a) == 0:
+    print("아이디가 존재하지 않습니다.")
+    whatid = input("아이디를 다시 입력해주세요:\n")
+    i=0
+    for mem in json_data['user']:
+        if mem['id']==whatid:
+            a.append(i)
+        i=i+1
+whatpw = input("비밀번호를 입력해주세요")
+while whatpw != real_pw :
+    print("비밀번호가 일치하지 않습니다.")
+    whatpw = input("비밀번호를 다시입력해주세요.\n")
+print("로그인 되셨습니다. 아이디는 "+str(whatid)+"이고 현재 score는 "+str(current_score)+"입니다")
+
+
 #아이템, 이동방향(4), 목표물 4면
 pygame.init()
-size = [900,900]
+size = [900,700]
 screen = pygame.display.set_mode(size)
 
 #게임창 옵션 설정
@@ -59,6 +113,7 @@ items = []
 bullet_items = []
 bullet3_items = []
 spawn = []
+lives = [] # 목숨 리스트
 for i in range(size[1]):
     spawn.append((0,i))
     spawn.append((size[0],i))
@@ -72,6 +127,20 @@ panda.x = (size[0]-panda.sx)//2
 panda.y = (size[1]-panda.sy)//2
 panda.mv = 5    #이속증가 템 추가
 
+# 목숨 이미지, 화면 왼쪽 아래에 나오게 위치 설정
+# for 문의 range의 인자는 목숨의 갯수를 의미함
+for i in range(3):
+    life = obj()
+    life.put_img("code/ss.png")
+    life.change_size(30, 30)
+    life.x, life.y = 15 + i*(life.sx + life.sx/2), size[1] - life.sy - 10
+    lives.append(life)
+
+# 결과 창에 나가기 버튼
+exit = obj()
+exit.put_img("code/exitbutton.png")
+exit.change_size(270, 80)
+exit.x, exit.y = size[0]/2 - exit.sx/2, size[1] * (4/5) - exit.sy/2
 
 left_go = False
 right_go = False
@@ -82,26 +151,33 @@ auto = False
 color = (0,0,0)
 white = (255, 255, 255)
 killed = 0
+rank = []
+result_id = []
+result_score = []
 level = 0
 bullet_size = 5
 remaining_bullet = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
+font2 = pygame.font.Font("code/bold_pw.ttf",40)
+font_r = pygame.font.Font("code/DungGeunMo.ttf", 45)
 
 # start
 SB = 0
 ST = 0
+SE = 0
 while ST == 0:
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             ST = 1
             SB = 1
+            SE = 1
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            if (mouse_x >= 400) & (mouse_x <= 500):
-                if (mouse_y >= 400) & (mouse_y <= 500):
+            if (mouse_x >= 320) & (mouse_x <= 580):
+                if (mouse_y >= 420) & (mouse_y <= 480):
                     ST = 1
-    text = font.render("Game Start", True, white)
+    text = font2.render("Game Start", True, white)
     rect = text.get_rect()
     rect.center = (450, 450)
     screen.fill(color)
@@ -116,6 +192,7 @@ while SB == 0:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             SB = 1
+            SE = 1
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 left_go = True
@@ -263,6 +340,8 @@ while SB == 0:
     dm_items = []
     dm_bullet_items = []
     dm_bullet3_items = []
+    dm_lives = []
+
     for i in range(len(bullets)):
         bullet = bullets[i]
         bullet.x += bullet.mv_x
@@ -322,16 +401,6 @@ while SB == 0:
                 dm_enemies.append(i)
                 dm_bullets.append(j)
                 killed += 1
-
-
-    for enemy in enemies:
-        if crash(enemy, panda):
-            explosion_sound_2.play()
-            lose = font.render("GAME OVER", True, (255,0,0))
-            screen.blit(lose, (400,400))
-            pygame.display.flip()
-            SB = 1
-            time.sleep(4)
     
     for i in range(len(items)):
         item = items[i]
@@ -350,6 +419,12 @@ while SB == 0:
         if crash(item, panda):
             remaining_bullet += 50
             dm_bullet3_items.append(i)
+
+    for i in range(len(enemies)):
+        enemy = enemies[i]
+        if crash(enemy, panda):
+            dm_enemies.append(i)
+            dm_lives.append(len(lives) - 1)
     
 
     now_time = datetime.now()
@@ -400,14 +475,84 @@ while SB == 0:
             new_items.append(item)
             item.show()
     bullet3_items = new_items[:]
+
+    new_lives = []
+    for i in range(len(lives)):
+        life = lives[i]
+        if i not in dm_lives:
+            new_lives.append(life)
+            life.show()
+    lives = new_lives[:]
+
     if auto:
         autotext = "ON"
     else:
         autotext = "OFF"
-    text = font.render("killed : {}, time : {}, score : {}, remaining 3bullets : {}, AUTO : {}".format(killed, delta_time, killed+delta_time//10, remaining_bullet, autotext), True, (255,255,255))
+
+    text = font.render("killed : {}, time : {}, score : {}".format(killed, delta_time, killed+delta_time//10), True, (255,255,255))
     screen.blit(text, (10,5))
     
+     # 목숨이 0일때 게임 종료
+    if len(lives) == 0:
+        explosion_sound_2.play()
+        lose = font.render("GAME OVER", True, (255,0,0))
+        screen.blit(lose, (400,400))
+        pygame.display.flip()
+        SB = 1
+        time.sleep(4)
+        
+        # 랭크 파일 리스트 불러오기
+        with open("code/member.json") as f1:
+            data = load(f1)
+            
+            #json파일에 score점수 업데이트
+        for mem in data['user']:
+            if mem['id']==whatid:
+                if mem['score'] <= (killed+delta_time//10):
+                    mem['score'] = (killed+delta_time//10)
+            
+        with open('code/member.json', 'w') as f:
+            dump(data, f, indent=2)
+
+        for member in data['user']:
+            rank.append((member['id'],member['score']))
+            rank.sort(key=lambda x:x[1], reverse=True)
+        
+        for i in range(len(rank)):
+            if i <= 5:
+                result_id.append("RANK{:d} : {:<20s}".format(i+1,rank[i][0]))
+                result_score.append("SCORE {:<8d}".format(rank[i][1]))
+    
     #update
+    pygame.display.flip()
+
+# 결과 창
+while SE == 0:
+    clock.tick(60)
+    screen.fill(color)
+    for i in range(len(result_id)):
+        text_Ri = font_r.render(result_id[i], True, white)
+        rect_Ri = text_Ri.get_rect()
+        rect_Ri = (size[0] * (1/8), size[1] * (1/6) + i * 60)
+        screen.blit(text_Ri, rect_Ri)
+
+    for i in range(len(result_score)):
+        text_Rs = font_r.render(result_score[i], True, white)
+        rect_Rs = text_Rs.get_rect()
+        rect_Rs = (size[0] * (5/8), size[1] * (1/6) + i * 60)
+        screen.blit(text_Rs, rect_Rs)
+    
+    exit.show()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            SE = 1
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if (mouse_x >= size[0]/2 - exit.sx/2) & (mouse_x <= size[0]/2 + exit.sx/2):
+                if (mouse_y >= size[1] * (4/5) - exit.sy/2) & (mouse_y <= size[1] * (4/5) + exit.sy/2):
+                    SE = 1
+
     pygame.display.flip()
 
 pygame.quit()
