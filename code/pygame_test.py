@@ -152,13 +152,14 @@ color = (0,0,0)
 white = (255, 255, 255)
 killed = 0
 rank = []
-result = []
+result_id = []
+result_score = []
 level = 0
 bullet_size = 5
 remaining_bullet = 0
 font = pygame.font.Font("code/bold_pw.ttf",20)
 font2 = pygame.font.Font("code/bold_pw.ttf",40)
-font_r = pygame.font.Font("code/D2CodingBold.ttf", 40)
+font_r = pygame.font.Font("code/DungGeunMo.ttf", 45)
 
 # start
 SB = 0
@@ -519,7 +520,8 @@ while SB == 0:
         
         for i in range(len(rank)):
             if i <= 5:
-                result.append("RANK{:d} : {:<10s}  SCORE {:<5d}".format(i+1,rank[i][0], rank[i][1]))
+                result_id.append("RANK{:d} : {:<20s}".format(i+1,rank[i][0]))
+                result_score.append("SCORE {:<8d}".format(rank[i][1]))
     
     #update
     pygame.display.flip()
@@ -528,11 +530,18 @@ while SB == 0:
 while SE == 0:
     clock.tick(60)
     screen.fill(color)
-    for i in range(len(result)):
-        text_R = font_r.render(result[i], True, white)
-        rect_R = text_R.get_rect()
-        rect_R.center = (size[0] * (1/2), size[1] * (1/6) + i * 60)
-        screen.blit(text_R, rect_R)
+    for i in range(len(result_id)):
+        text_Ri = font_r.render(result_id[i], True, white)
+        rect_Ri = text_Ri.get_rect()
+        rect_Ri = (size[0] * (1/8), size[1] * (1/6) + i * 60)
+        screen.blit(text_Ri, rect_Ri)
+
+    for i in range(len(result_score)):
+        text_Rs = font_r.render(result_score[i], True, white)
+        rect_Rs = text_Rs.get_rect()
+        rect_Rs = (size[0] * (5/8), size[1] * (1/6) + i * 60)
+        screen.blit(text_Rs, rect_Rs)
+    
     exit.show()
 
     for event in pygame.event.get():
