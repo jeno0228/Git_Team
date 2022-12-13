@@ -60,7 +60,7 @@ print("로그인 되셨습니다. 아이디는 "+str(whatid)+"이고 현재 scor
 
 #아이템, 이동방향(4), 목표물 4면
 pygame.init()
-size = [900,700]
+size = [900,900]
 screen = pygame.display.set_mode(size)
 
 #게임창 옵션 설정
@@ -80,6 +80,7 @@ class obj:
         self.mv = 0
         self.mv_x = 0
         self.mv_y = 0
+        self.hp = 0
     def put_img(self, address):
         if address[-3:] == "png":
             self.img = pygame.image.load(address).convert_alpha()
@@ -106,7 +107,7 @@ explosion_sound_2 = pygame.mixer.Sound('code/DeathFlash.flac')
 
 panda = obj()
 panda.put_img("code/ss.png")
-panda.change_size(50,50)
+panda.change_size(45,50)
 bullets = []
 enemies = []
 items = []
@@ -182,6 +183,24 @@ while ST == 0:
     rect.center = (450, 450)
     screen.fill(color)
     screen.blit(text, rect)
+    enemy = obj()
+    enemy.put_img("code/aa.png")
+    enemy.change_size(40, 40)
+    enemy.x = 10
+    enemy.y = 10
+    enemy.show()
+    info1 = font2.render("hp: 1            speed: 4", True, white)
+    screen.blit(info1, (70, 10))
+
+    stone = obj()
+    stone.put_img("code/stone.png")
+    stone.change_size(40, 40)
+    stone.x = 10
+    stone.y = 80
+    stone.show()
+    info2 = font2.render("hp: 20            speed: 1.5 ", True, white)
+    screen.blit(info2, (70, 80))
+
     pygame.display.flip()
 
 start_time = datetime.now()
@@ -355,7 +374,18 @@ while SB == 0:
         enemy.change_size(30,30)
         enemy.x, enemy.y = random.choice(spawn)
         enemy.mv = 4
+        enemy.hp = 1
         enemies.append(enemy)
+
+    if random.random() > (0.98-0.01*level):
+        enemy = obj()
+        enemy.put_img("code/stone.png")
+        enemy.change_size(50,50)
+        enemy.x, enemy.y = random.choice(spawn)
+        enemy.mv = 1.5
+        enemy.hp = 20
+        enemies.append(enemy)
+
 
     if (random.random() > 0.997 and len(items) < 3):
         item = obj()
@@ -398,9 +428,11 @@ while SB == 0:
             bullet = bullets[j]
             if crash(enemy, bullet):
                 explosion_sound_1.play()
-                dm_enemies.append(i)
                 dm_bullets.append(j)
-                killed += 1
+                enemy.hp -= 1
+                if enemy.hp <= 0:
+                    dm_enemies.append(i)
+                    killed += 1
     
     for i in range(len(items)):
         item = items[i]
@@ -495,8 +527,8 @@ while SB == 0:
      # 목숨이 0일때 게임 종료
     if len(lives) == 0:
         explosion_sound_2.play()
-        lose = font.render("GAME OVER", True, (255,0,0))
-        screen.blit(lose, (400,400))
+        lose = font2.render("GAME OVER", True, (255,0,0))
+        screen.blit(lose, (350,400))
         pygame.display.flip()
         SB = 1
         time.sleep(4)
