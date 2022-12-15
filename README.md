@@ -29,14 +29,14 @@ python을 이용한 슈팅 게임 구현
 ## 사용 언어
 
 * PYTHON
-  
-  * pygame
-  * math
-  * os
-  * datetime
-  * json
-  * random
-  * time
+  * import할 모듈 
+   * pygame
+   * math
+   * os
+   * datetime
+   * json
+   * random
+   * time
 
 
 ## 개발 환경
