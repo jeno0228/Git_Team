@@ -21,6 +21,7 @@
 python을 이용한 슈팅 게임 구현
 
 ![game](https://github.com/jeno0228/Git_Team/blob/main/code/%EA%B7%B8%EB%A6%BC01.jpg)
+
 게임 
 
 * pygame_test.py 
