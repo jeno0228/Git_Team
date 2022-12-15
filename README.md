@@ -20,7 +20,7 @@
 
 python을 이용한 슈팅 게임 구현
 
-![game](./그림01.jpg)
+![game](./img/그림01.jpg)
 게임 
 
 * pygame_test.py 
