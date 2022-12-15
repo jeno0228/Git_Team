@@ -15,6 +15,7 @@
 
 python을 이용한 슈팅 게임 구현
 
+* pygame_test.py 
 
 ## 사용 언어
 
