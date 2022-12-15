@@ -29,7 +29,8 @@ python을 이용한 슈팅 게임 구현
 ## 사용 언어
 
 * PYTHON
-  * import할 모듈 
+  * import할 모듈
+   
    + pygame
    + math
    + os
